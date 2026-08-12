@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+useradd --create-home --user-group --shell /bin/bash nas-tunnel
+install -d -m 0700 -o nas-tunnel -g nas-tunnel /home/nas-tunnel/.ssh
+printf '%s\n' 'restrict,port-forwarding,permitlisten="127.0.0.1:${reverse_port}" ${public_key}' \
+  >/home/nas-tunnel/.ssh/authorized_keys
+chown nas-tunnel:nas-tunnel /home/nas-tunnel/.ssh/authorized_keys
+chmod 0600 /home/nas-tunnel/.ssh/authorized_keys
+
+cat >/etc/ssh/sshd_config.d/90-nas-tunnel.conf <<'EOF'
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+AllowUsers nas-tunnel
+
+Match User nas-tunnel
+    AuthenticationMethods publickey
+    AllowTcpForwarding remote
+    GatewayPorts no
+    PermitTTY no
+    X11Forwarding no
+    AllowAgentForwarding no
+    PermitOpen none
+    PermitListen 127.0.0.1:${reverse_port}
+EOF
+
+sshd -t
+systemctl restart sshd
+

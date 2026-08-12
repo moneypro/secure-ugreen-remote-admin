@@ -1,0 +1,14 @@
+[Unit]
+Description=Friend NAS WireGuard Docker bridge isolation
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/friend-nas-isolation apply
+ExecStop=/usr/local/sbin/friend-nas-isolation remove
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,40 @@
+services:
+  wireguard:
+    container_name: friend-nas-primary-wg
+    build:
+      context: ../../gateway
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /run:size=4m,mode=0755
+      - /tmp:size=4m,mode=1777
+    env_file:
+      - ../../private/site.env
+    environment:
+      ROLE: nas
+    extra_hosts:
+      - ugos-host:host-gateway
+    volumes:
+      - ../../private/rendered/nas-wg0.conf:/etc/wireguard/wg0.conf:ro
+    networks:
+      nas-primary:
+        ipv4_address: 10.250.78.2
+
+networks:
+  nas-primary:
+    name: friend-nas-primary
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-friendnas
+    ipam:
+      config:
+        - subnet: 10.250.78.0/29
+          gateway: 10.250.78.1

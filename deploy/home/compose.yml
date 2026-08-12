@@ -1,0 +1,43 @@
+services:
+  wireguard:
+    container_name: friend-nas-home-wg
+    build:
+      context: ../../gateway
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /run:size=4m,mode=0755
+      - /tmp:size=4m,mode=1777
+    env_file:
+      - ../../private/site.env
+    environment:
+      ROLE: home
+      HOME_BRIDGE_GATEWAY: 10.250.77.1
+    volumes:
+      - ../../private/rendered/home-wg0.conf:/etc/wireguard/wg0.conf:ro
+    ports:
+      - "${HOME_WG_PORT:-51830}:${HOME_WG_PORT:-51830}/udp"
+      - "127.0.0.1:${HOME_PROXY_PORT:-22010}:${HOME_PROXY_PORT:-22010}/tcp"
+    networks:
+      friend-wg:
+        ipv4_address: 10.250.77.2
+
+networks:
+  friend-wg:
+    name: friend-wg
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-friendwg
+    ipam:
+      config:
+        - subnet: 10.250.77.0/29
+          gateway: 10.250.77.1
+

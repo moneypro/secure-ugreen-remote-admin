@@ -1,0 +1,10 @@
+[Unit]
+Description=Update friend NAS Seattle Route 53 endpoint
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/friend-nas-route53-ddns /etc/friend-nas-remote/site.env
+UMask=0077
+

@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodically update friend NAS Seattle Route 53 endpoint
+
+[Timer]
+OnBootSec=45s
+OnUnitActiveSec=2min
+RandomizedDelaySec=20s
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+

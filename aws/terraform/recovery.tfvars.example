@@ -1,0 +1,6 @@
+aws_region                     = "ap-east-1"
+name                           = "friend-nas-recovery"
+instance_type                  = "t3.nano"
+nas_source_cidrs               = ["0.0.0.0/0"]
+recovery_tunnel_public_key     = "ssh-ed25519 REPLACE_WITH_NAS_TUNNEL_PUBLIC_KEY"
+

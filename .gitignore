@@ -1,0 +1,15 @@
+private/
+.env
+*.tfstate
+*.tfstate.*
+.terraform/
+crash.log
+*.key
+*.pem
+*.p12
+*.pfx
+*.age
+*.mobileconfig
+wg0.conf
+known_hosts
+authorized_keys

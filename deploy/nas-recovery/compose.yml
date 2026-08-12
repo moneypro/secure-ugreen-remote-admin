@@ -1,0 +1,35 @@
+services:
+  recovery:
+    container_name: friend-nas-recovery
+    build:
+      context: ../../recovery
+    restart: unless-stopped
+    user: "0:0"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=4m,mode=1777
+    env_file:
+      - ../../private/recovery.env
+    extra_hosts:
+      - ugos-host:host-gateway
+    volumes:
+      - ../../private/keys/recovery-tunnel:/run/secrets/recovery-tunnel:ro
+      - ../../private/recovery-known-hosts:/run/secrets/recovery-known-hosts:ro
+    networks:
+      recovery:
+        ipv4_address: 10.250.79.2
+
+networks:
+  recovery:
+    name: friend-nas-recovery
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-friendrecovery
+    ipam:
+      config:
+        - subnet: 10.250.79.0/29
+          gateway: 10.250.79.1
