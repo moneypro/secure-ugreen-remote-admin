@@ -13,7 +13,7 @@ wg_run() {
   if command -v wg >/dev/null 2>&1; then
     wg "$@"
   elif command -v docker >/dev/null 2>&1; then
-    docker run --rm --network none --entrypoint wg lscr.io/linuxserver/wireguard:latest "$@"
+    docker run --rm -i --network none --entrypoint /usr/bin/wg lscr.io/linuxserver/wireguard:latest "$@"
   else
     die 'WireGuard tools unavailable; install wireguard-tools or Docker'
   fi

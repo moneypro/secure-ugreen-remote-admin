@@ -21,10 +21,9 @@ if rg -n --hidden --glob '!tests/static.sh' \
   exit 1
 fi
 
-if find . -path './.git' -prune -o -type f \( -name '*.key' -o -name '*.pem' -o -name 'wg0.conf' \) -print | grep -q .; then
+if find . \( -path './.git' -o -path './private' \) -prune -o -type f \( -name '*.key' -o -name '*.pem' -o -name 'wg0.conf' \) -print | grep -q .; then
   printf 'secret-like generated file present\n' >&2
   exit 1
 fi
 
 printf 'static checks: ok\n'
-

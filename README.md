@@ -20,6 +20,7 @@ under `private/`, which Git ignores.
 git clone https://github.com/moneypro/secure-ugreen-remote-admin.git
 cd secure-ugreen-remote-admin
 make check
+(cd enrollment/seattle && sha256sum -c SHA256SUMS)
 ```
 
 ### 2. Run audits before changing anything
@@ -56,15 +57,10 @@ Choose a Route 53 hostname and verify that `10.77.0.0/24`,
 `10.250.77.0/29`, `10.250.78.0/29`, and `10.250.79.0/29` do not overlap
 either site.
 
-### 4. Generate independent credentials
+### 4. Generate the NAS-owned credentials
 
-On Seattle:
-
-```bash
-./bin/ugreen-remote generate-keys home
-./bin/ugreen-remote generate-keys primary-admin
-./bin/ugreen-remote generate-keys recovery-admin
-```
+The Seattle public keys are already in `enrollment/seattle/`. Their private halves
+exist only in Seattle's ignored `private/keys/` directory.
 
 On the NAS:
 
@@ -73,18 +69,26 @@ sudo ./bin/ugreen-remote generate-keys nas
 sudo ./bin/ugreen-remote generate-keys recovery-tunnel
 ```
 
-Exchange only `.pub` files. Copy public material over the local LAN or another
-authenticated channel. Never copy private keys into this repository.
+Print the NAS public keys:
+
+```bash
+cat private/keys/nas.wg.pub
+cat private/keys/recovery-tunnel.pub
+```
+
+Paste both public-key lines into the Codex session running on Seattle. They will be
+stored as `private/received/nas.wg.pub` and
+`private/received/recovery-tunnel.pub`. Never paste or copy the files without the
+`.pub` suffix.
 
 ### 5. Install the UGOS administrator key
 
-While still on the friend's LAN, copy Seattle's `primary-admin.pub` to the NAS,
-then run:
+While still on the friend's LAN, install Seattle's committed public key:
 
 ```bash
 sudo ./nas/install-admin-user.sh \
   --user friend-admin \
-  --public-key private/received/primary-admin.pub \
+  --public-key enrollment/seattle/primary-admin.pub \
   --source 10.250.78.2 \
   --sudo-mode password
 sudo passwd friend-admin
@@ -107,7 +111,15 @@ sudo ./nas/harden-sshd.sh check
 
 ### 6. Render and start primary WireGuard
 
-Put the exchanged public keys into `private/received/`, then run on each side:
+The NAS public key goes into Seattle's `private/received/`; copy the committed
+Seattle WireGuard public key into the NAS receive directory:
+
+```bash
+mkdir -p private/received
+cp enrollment/seattle/home.wg.pub private/received/home.wg.pub
+```
+
+Then run on each side:
 
 ```bash
 ./bin/ugreen-remote render
@@ -175,7 +187,7 @@ $EDITOR private/recovery.env
 ./aws/get-recovery-host-key.sh INSTANCE_ID ELASTIC_IP > private/recovery-known-hosts
 sudo ./nas/install-admin-user.sh \
   --user friend-admin \
-  --public-key private/received/recovery-admin.pub \
+  --public-key enrollment/seattle/recovery-admin.pub \
   --source 10.250.79.2 \
   --sudo-mode password
 sudo docker compose -f deploy/nas-recovery/compose.yml up -d --build
