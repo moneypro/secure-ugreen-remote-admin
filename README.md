@@ -135,6 +135,7 @@ From Seattle:
 ```bash
 ssh -F private/ssh-config friend-nas
 sudo -v
+sudo ./home/install-isolation-service.sh
 ```
 
 ### 7. Configure Route 53 DDNS
