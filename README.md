@@ -25,6 +25,18 @@ make check
 
 ### 2. Run audits before changing anything
 
+Find the NAS LAN address in UGOS under Control Panel -> Network -> Network
+Connection. From an existing NAS terminal, the equivalent checks are:
+
+```bash
+hostname -I
+ip -brief address
+ip route get 1.1.1.1
+```
+
+Use the source address shown by `ip route get 1.1.1.1` as `NAS_LAN_IP`. The
+friend site's public IP is not needed for either management path.
+
 On Seattle:
 
 ```bash
@@ -81,17 +93,28 @@ stored as `private/received/nas.wg.pub` and
 `private/received/recovery-tunnel.pub`. Never paste or copy the files without the
 `.pub` suffix.
 
-### 5. Install the UGOS administrator key
+### 5. Enroll the UGOS administrator
 
-While still on the friend's LAN, install Seattle's committed public key:
+In UGOS, create a dedicated administrator, enable its personal folder, and enable
+SSH under Control Panel -> Terminal. Verify the account locally before installing
+keys:
 
 ```bash
-sudo ./nas/install-admin-user.sh \
-  --user friend-admin \
-  --public-key enrollment/seattle/primary-admin.pub \
-  --source 10.250.78.2 \
-  --sudo-mode password
-sudo passwd friend-admin
+ssh UGOS_ADMIN@NAS_LAN_IP
+sudo -l
+sudo -i
+id  # must report uid=0
+```
+
+Keep that session open. In the cloned repository, enroll both Seattle public keys
+into the existing UGOS account:
+
+```bash
+sudo ./nas/enroll-existing-admin.sh \
+  --user UGOS_ADMIN \
+  --primary-key enrollment/seattle/primary-admin.pub \
+  --recovery-key enrollment/seattle/recovery-admin.pub
+sudo ./nas/install-permission-repair.sh
 ```
 
 Record and verify the UGOS SSH host key locally:
@@ -185,11 +208,6 @@ then:
 cp config/recovery.env.example private/recovery.env
 $EDITOR private/recovery.env
 ./aws/get-recovery-host-key.sh INSTANCE_ID ELASTIC_IP > private/recovery-known-hosts
-sudo ./nas/install-admin-user.sh \
-  --user friend-admin \
-  --public-key enrollment/seattle/recovery-admin.pub \
-  --source 10.250.79.2 \
-  --sudo-mode password
 sudo docker compose -f deploy/nas-recovery/compose.yml up -d --build
 ```
 

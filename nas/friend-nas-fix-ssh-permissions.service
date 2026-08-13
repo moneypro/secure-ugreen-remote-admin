@@ -1,0 +1,11 @@
+[Unit]
+Description=Restore UGOS administrator SSH key permissions
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/friend-nas-fix-ssh-permissions
+
+[Install]
+WantedBy=multi-user.target
+

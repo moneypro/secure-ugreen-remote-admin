@@ -11,6 +11,7 @@
 | Seattle SSH alias | `private/ssh-config` |
 | Seattle isolation backups | `/var/lib/friend-nas-remote/backups/` |
 | NAS account backups | `/var/backups/friend-nas-remote/` |
+| NAS permission repair | `/usr/local/sbin/friend-nas-fix-ssh-permissions` |
 | Seattle DDNS config | `/etc/friend-nas-remote/site.env` |
 
 ## Health
@@ -54,4 +55,3 @@ then remove the old authorized-key line. Primary and recovery keys remain distin
 3. Remove the `nas-tunnel` authorized key or destroy the dedicated EC2 stack.
 4. Remove the Route 53 record and router port forward if no longer used.
 5. Preserve logs and backups until revocation is verified.
-

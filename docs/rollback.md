@@ -11,14 +11,14 @@ sudo docker network rm friend-nas-recovery friend-nas-primary 2>/dev/null || tru
 ```
 
 Remove only the public-key lines added for `primary-admin` and `recovery-admin` from
-`friend-admin`'s `authorized_keys`. Validate sudoers before removing the dedicated
-user:
+the UGOS administrator's `authorized_keys`, then remove the permission-repair unit:
 
 ```bash
-sudo rm /etc/sudoers.d/90-friend-admin
-sudo visudo -c
-sudo userdel -r friend-admin
+sudo systemctl disable --now friend-nas-fix-ssh-permissions.service
 ```
+
+Do not delete or modify the UGOS account from the shell. Remove it later through the
+UGOS UI only if desired.
 
 Retain `/var/backups/friend-nas-remote/` until rollback is verified.
 
@@ -49,4 +49,3 @@ terraform destroy -var-file=../../private/recovery.tfvars
 
 Confirm the dedicated EIP, instance, IAM role/profile, security group, subnet,
 route table, gateway, and VPC were removed. Do not target the existing AI/CAD stack.
-
